@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🇮🇹 Imparo l'italiano</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --terra: #B85C38; --terra-dark: #8B3A20; --cream: #F7F0E3;
+      --parchment: #EDE0C4; --espresso: #1C0A00; --gold: #C9A84C;
+      --sage: #7A9E7E; --sky: #4A7FA5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--cream); color: var(--espresso);
+      font-family: 'Lora', Georgia, serif; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 40px 20px 60px;
+      background-image:
+        radial-gradient(ellipse at 15% 15%, rgba(184,92,56,0.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 80%, rgba(201,168,76,0.09) 0%, transparent 55%);
+    }
+    .container { max-width: 700px; width: 100%; }
+    header { text-align: center; margin-bottom: 36px; }
+    .flag { font-size: 50px; display: block; margin-bottom: 10px; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 700; color: var(--terra-dark); line-height: 1.1; margin-bottom: 8px; }
+    h1 em { font-style: italic; color: var(--terra); }
+    .subtitle { font-size: 1rem; color: #6B5744; font-style: italic; }
+    .divider { width: 80px; height: 2px; background: linear-gradient(to right, transparent, var(--gold), transparent); margin: 18px auto; }
+
+    .card { background: white; border-radius: 14px; padding: 28px 32px; box-shadow: 0 4px 24px rgba(28,10,0,0.07); border: 1px solid rgba(201,168,76,0.2); margin-bottom: 20px; }
+    .card h2 { font-family: 'Playfair Display', serif; font-size: 1.25rem; color: var(--terra-dark); margin-bottom: 18px; }
+
+    label.lbl { font-size: 0.87rem; font-weight: 600; color: #5A3E2B; margin-bottom: 5px; display: block; letter-spacing: 0.03em; }
+    input.inp, textarea.inp {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid rgba(184,92,56,0.25); border-radius: 8px;
+      font-family: 'Lora', serif; font-size: 0.9rem;
+      background: var(--cream); color: var(--espresso);
+      transition: border-color 0.2s; margin-bottom: 6px;
+    }
+    input.inp:focus, textarea.inp:focus { outline: none; border-color: var(--terra); }
+    .hint { font-size: 0.78rem; color: #8B7160; font-style: italic; margin-bottom: 16px; }
+    .hint a { color: var(--sky); }
+
+    .btn {
+      display: block; width: 100%; padding: 16px 32px;
+      background: linear-gradient(135deg, var(--terra), var(--terra-dark));
+      color: var(--cream); border: none; border-radius: 9px;
+      font-family: 'Playfair Display', serif; font-size: 1.05rem; font-style: italic;
+      cursor: pointer; transition: all 0.3s ease;
+      box-shadow: 0 4px 18px rgba(139,58,32,0.28); letter-spacing: 0.02em;
+    }
+    .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(139,58,32,0.38); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-outline {
+      background: white; color: var(--terra-dark); border: 1.5px solid var(--terra);
+      box-shadow: none; font-style: normal; font-size: 0.93rem; margin-top: 10px;
+    }
+    .btn-outline:hover:not(:disabled) { background: var(--parchment); }
+
+    .status { margin-top: 18px; padding: 14px 18px; border-radius: 9px; font-size: 0.92rem; line-height: 1.6; display: none; }
+    .status.loading { background: rgba(74,127,165,0.09); border-left: 3px solid var(--sky); color: #2A5F85; display: block; }
+    .status.success { background: rgba(122,158,126,0.1); border-left: 3px solid var(--sage); color: #2E6B34; display: block; }
+    .status.error { background: rgba(184,92,56,0.1); border-left: 3px solid var(--terra); color: var(--terra-dark); display: block; }
+
+    .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(74,127,165,0.25); border-top-color: var(--sky); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .step-list { list-style: none; margin: 8px 0 0; }
+    .step-list li { font-size: 0.83rem; color: #6B5744; padding: 2px 0; opacity: 0.4; transition: all 0.3s; }
+    .step-list li.active { opacity: 1; color: var(--sky); }
+    .step-list li.done { opacity: 1; color: #3A7A3E; }
+    .step-list li::before { content: '○  '; }
+    .step-list li.active::before { content: '◉ '; }
+    .step-list li.done::before { content: '✓ '; }
+
+    .info-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .info-item { padding: 14px; background: var(--parchment); border-radius: 10px; text-align: center; border: 1px solid rgba(201,168,76,0.2); }
+    .info-item .num { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--terra); display: block; }
+    .info-item .label { font-size: 0.72rem; color: #6B5744; text-transform: uppercase; letter-spacing: 0.1em; }
+
+    /* Sentence cards */
+    .sentences { margin-top: 22px; display: none; }
+    .sentences h3 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--terra-dark); margin-bottom: 14px; }
+    .sentence-card { background: white; border-radius: 10px; padding: 18px 20px; margin-bottom: 12px; border-left: 4px solid var(--terra); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .sentence-it { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-style: italic; color: var(--espresso); margin-bottom: 5px; }
+    .sentence-no { font-size: 0.88rem; color: #6B5744; margin-bottom: 8px; }
+    .word-badge { display: inline-block; background: var(--terra); color: white; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .word-meaning { font-size: 0.82rem; color: #5A3E2B; margin-left: 8px; }
+    .grammar-tip { margin-top: 9px; font-size: 0.82rem; color: #5A7A8A; font-style: italic; background: rgba(74,127,165,0.07); padding: 8px 12px; border-radius: 6px; }
+
+    /* Comment box */
+    .comment-box { margin-top: 20px; display: none; background: var(--parchment); border-radius: 10px; padding: 18px 20px; border: 1px solid rgba(201,168,76,0.3); }
+    .comment-box h3 { font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--terra-dark); margin-bottom: 10px; }
+    .comment-body { font-size: 0.88rem; line-height: 1.75; color: #4A3728; white-space: pre-wrap; }
+
+    /* Library table */
+    .library { margin-top: 0; overflow-x: auto; display: none; }
+    .lib-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .lib-table th { background: var(--parchment); color: #5A3E2B; font-weight: 600; padding: 9px 12px; text-align: left; font-family: 'Playfair Display', serif; font-size: 0.85rem; letter-spacing: 0.03em; border-bottom: 2px solid rgba(201,168,76,0.3); }
+    .lib-table td { padding: 9px 12px; border-bottom: 1px solid rgba(201,168,76,0.15); vertical-align: top; color: var(--espresso); }
+    .lib-table tr:last-child td { border-bottom: none; }
+    .lib-table tr:hover td { background: rgba(237,224,196,0.3); }
+    .it-word { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 600; color: var(--terra-dark); }
+    .day-tag { display: inline-block; background: var(--terra); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; }
+
+    /* Gist link */
+    .gist-link { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--parchment); border-radius: 9px; text-decoration: none; color: var(--espresso); font-size: 0.9rem; border: 1px solid rgba(201,168,76,0.3); transition: all 0.2s; margin-top: 14px; word-break: break-all; }
+    .gist-link:hover { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+
+    .tabs { display: flex; gap: 2px; margin-bottom: 20px; background: var(--parchment); border-radius: 9px; padding: 4px; }
+    .tab { flex: 1; padding: 9px; text-align: center; border-radius: 7px; cursor: pointer; font-size: 0.88rem; font-family: 'Lora', serif; color: #6B5744; transition: all 0.2s; border: none; background: none; }
+    .tab.active { background: white; color: var(--terra-dark); font-weight: 600; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+
+    footer { text-align: center; margin-top: 36px; color: #9B8472; font-size: 0.84rem; font-style: italic; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <span class="flag">🇮🇹</span>
+    <h1>Imparo <em>l'italiano</em></h1>
+    <p class="subtitle">Daglig italiensk — A1–A2 · lagret i GitHub Gist</p>
+    <div class="divider"></div>
+  </header>
+
+  <!-- Setup -->
+  <div class="card" id="setupCard">
+    <h2>⚙️ Oppsett</h2>
+    <label class="lbl" for="ghToken">GitHub Personal Access Token</label>
+    <input class="inp" type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
+    <p class="hint">
+      Gå til <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a>
+      → huk av <strong>gist</strong> → generer token. Lagres kun i nettleseren denne sesjonen.
+    </p>
+    <label class="lbl" for="gistId">Gist ID <span style="font-weight:400;color:#8B7160">(tom = oppretter ny automatisk første gang)</span></label>
+    <input class="inp" type="text" id="gistId" placeholder="abc123def456..." />
+    <p class="hint">Etter første kjøring vises Gist-ID-en din her — lim den inn neste gang for å fortsette historikken.</p>
+  </div>
+
+  <!-- Main tabs -->
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('today')">📅 Dagens leksjon</button>
+      <button class="tab" onclick="showTab('library')">📚 Ordbibliotek</button>
+    </div>
+
+    <!-- Today tab -->
+    <div id="tabToday">
+      <div class="info-row">
+        <div class="info-item"><span class="num" id="dayNum">—</span><span class="label">Dag nr.</span></div>
+        <div class="info-item"><span class="num" id="wordCount">—</span><span class="label">Ord lært</span></div>
+        <div class="info-item"><span class="num" id="dateDisplay">—</span><span class="label">Dato</span></div>
+      </div>
+
+      <button class="btn" id="generateBtn" onclick="runFullFlow()">✨ Generer og lagre dagens leksjon</button>
+      <button class="btn btn-outline" id="loadBtn" onclick="loadFromGist()">↓ Last inn eksisterende historikk</button>
+
+      <div class="status" id="statusBox"></div>
+      <div class="sentences" id="sentencesBox"></div>
+      <div class="comment-box" id="commentBox">
+        <h3>💬 Grammatikk-gjennomgang (gårsdagens ord):</h3>
+        <div class="comment-body" id="commentBody"></div>
+      </div>
+
+      <div id="gistLinkBox" style="display:none">
+        <a class="gist-link" id="gistLink" href="#" target="_blank">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          <span id="gistLinkText">Åpne Gist-en din →</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Library tab -->
+    <div id="tabLibrary" style="display:none">
+      <div id="libraryEmpty" style="text-align:center;padding:30px 0;color:#8B7160;font-style:italic;">
+        Ingen ord lært ennå. Generer din første leksjon!
+      </div>
+      <div class="library" id="libraryBox">
+        <table class="lib-table">
+          <thead><tr><th>Italiensk</th><th>Norsk</th><th>Eksempelsetning</th><th>Dag</th></tr></thead>
+          <tbody id="libraryBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer><em>Piano piano si va lontano</em> — Sakte sakte kommer man langt 🌿</footer>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let state = { words: [], lessons: [] }; // words: [{word, meaning, sentence, day, date}], lessons: [{day, date, sentences, comment}]
+
+function showTab(t) {
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tabToday').style.display = t === 'today' ? '' : 'none';
+  document.getElementById('tabLibrary').style.display = t === 'library' ? '' : 'none';
+  if (t === 'library') renderLibrary();
+}
+
+function setStatus(type, html) {
+  const b = document.getElementById('statusBox');
+  b.className = 'status ' + type;
+  b.innerHTML = html;
+}
+
+function getToday() {
+  const now = new Date();
+  const days = ['søndag','mandag','tirsdag','onsdag','torsdag','fredag','lørdag'];
+  const months = ['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+  return `${days[now.getDay()]} ${now.getDate()}. ${months[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+function getDayNum() {
+  const start = new Date('2026-03-16');
+  return Math.max(1, Math.floor((new Date() - start) / (1000*60*60*24)) + 1);
+}
+
+// ── GitHub Gist API ───────────────────────────────────────────────────────────
+function getToken() { return document.getElementById('ghToken').value.trim(); }
+function getGistId() { return document.getElementById('gistId').value.trim(); }
+
+async function readGist(gistId, token) {
+  const r = await fetch(`https://api.github.com/gists/${gistId}`, {
+    headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
+  });
+  if (!r.ok) throw new Error('Klarte ikke lese Gist: ' + r.status);
+  const data = await r.json();
+  const content = data.files['italiano-data.json']?.content;
+  if (!content) throw new Error('Fant ikke italiano-data.json i Gist-en.');
+  return JSON.parse(content);
+}
+
+async function writeGist(stateData, token, gistId) {
+  const body = {
+    description: '🇮🇹 Imparo l\'italiano — leksjonshistorikk og ordbibliotek',
+    public: false,
+    files: { 'italiano-data.json': { content: JSON.stringify(stateData, null, 2) } }
+  };
+  let url = 'https://api.github.com/gists';
+  let method = 'POST';
+  if (gistId) { url = `https://api.github.com/gists/${gistId}`; method = 'PATCH'; }
+  const r = await fetch(url, {
+    method, headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const e = await r.json(); throw new Error('GitHub: ' + (e.message || r.status)); }
+  return await r.json();
+}
+
+// ── Claude ────────────────────────────────────────────────────────────────────
+async function generateLesson(dayNum, learnedWords, today) {
+  const prev = state.lessons[state.lessons.length - 1];
+  const prevSummary = prev
+    ? `Gårsdagens ord (dag ${prev.day}): ${prev.sentences.map(s => s.word + ' = ' + s.meaning).join(', ')}.`
+    : '';
+
+  const avoidList = learnedWords.length > 0 ? 'Disse ordene er allerede lært og MÅ unngås: ' + learnedWords.join(', ') : 'Ingen ord lært ennå — dag 1.';
+
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      system: `Du er en vennlig italiensklærer for norske A1–A2-elever.
+${avoidList}
+${prevSummary}
+
+Svar KUN med gyldig JSON uten backticks eller annen tekst:
+{
+  "sentences": [
+    { "italian": "Io mangio la pizza.", "norwegian": "Jeg spiser pizza.", "word": "mangiare", "meaning": "å spise", "grammar": "io mangio, tu mangi, lui/lei mangia" }
+  ],
+  "comment": "Norsk tekst: kort gjennomgang av gårsdagens ord og 1-2 grammatikktips. Tom streng hvis dag 1."
+}`,
+      messages: [{ role: 'user', content: `Lag leksjon for ${today}, dag ${dayNum}. Tre setninger med tre forskjellige, nye A1-A2-ord.` }]
+    })
+  });
+  const d = await r.json();
+  if (d.error) throw new Error('Claude: ' + d.error.message);
+  const raw = d.content.filter(b => b.type === 'text').map(b => b.text).join('');
+  return JSON.parse(raw.replace(/```json|```/g, '').trim());
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderSentences(lesson) {
+  const box = document.getElementById('sentencesBox');
+  box.innerHTML = '<h3>🌿 Dagens setninger:</h3>';
+  lesson.sentences.forEach(s => {
+    box.innerHTML += `<div class="sentence-card">
+      <div class="sentence-it">${s.italian}</div>
+      <div class="sentence-no">🇳🇴 ${s.norwegian}</div>
+      <span class="word-badge">${s.word}</span><span class="word-meaning">= ${s.meaning}</span>
+      ${s.grammar ? `<div class="grammar-tip">📐 ${s.grammar}</div>` : ''}
+    </div>`;
+  });
+  box.style.display = 'block';
+}
+
+function renderLibrary() {
+  const empty = document.getElementById('libraryEmpty');
+  const box = document.getElementById('libraryBox');
+  const tbody = document.getElementById('libraryBody');
+  if (state.words.length === 0) { empty.style.display = ''; box.style.display = 'none'; return; }
+  empty.style.display = 'none';
+  const sorted = [...state.words].sort((a,b) => a.word.localeCompare(b.word));
+  tbody.innerHTML = sorted.map(w => `<tr>
+    <td><span class="it-word">${w.word}</span></td>
+    <td>${w.meaning}</td>
+    <td style="font-style:italic;color:#5A3E2B">${w.sentence}</td>
+    <td><span class="day-tag">dag ${w.day}</span></td>
+  </tr>`).join('');
+  box.style.display = 'block';
+}
+
+function updateCounters() {
+  document.getElementById('wordCount').textContent = state.words.length;
+  document.getElementById('dayNum').textContent = getDayNum();
+  const now = new Date();
+  const months = ['jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des'];
+  document.getElementById('dateDisplay').textContent = `${now.getDate()}. ${months[now.getMonth()]}`;
+}
+
+// ── Load existing ─────────────────────────────────────────────────────────────
+async function loadFromGist() {
+  const token = getToken();
+  const gistId = getGistId();
+  if (!token) { setStatus('error', '❌ Fyll inn GitHub-token.'); return; }
+  if (!gistId) { setStatus('error', '❌ Fyll inn Gist-ID for å laste inn eksisterende historikk.'); return; }
+  setStatus('loading', '<span class="spinner"></span>Laster inn historikk fra Gist...');
+  try {
+    state = await readGist(gistId, token);
+    updateCounters();
+    setStatus('success', `✅ Historikk lastet! ${state.words.length} ord, ${state.lessons.length} leksjoner.`);
+    showGistLink(gistId);
+  } catch(e) {
+    setStatus('error', '❌ ' + e.message);
+  }
+}
+
+function showGistLink(gistId) {
+  document.getElementById('gistId').value = gistId;
+  document.getElementById('gistLink').href = `https://gist.github.com/${gistId}`;
+  document.getElementById('gistLinkText').textContent = `Gist: gist.github.com/${gistId.slice(0,12)}…`;
+  document.getElementById('gistLinkBox').style.display = 'block';
+}
+
+// ── Main flow ─────────────────────────────────────────────────────────────────
+async function runFullFlow() {
+  const token = getToken();
+  if (!token) { setStatus('error', '❌ Fyll inn GitHub Personal Access Token øverst.'); return; }
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  document.getElementById('sentencesBox').style.display = 'none';
+  document.getElementById('commentBox').style.display = 'none';
+
+  const today = getToday();
+  const dayNum = getDayNum();
+  const learnedWords = state.words.map(w => w.word);
+
+  // Sjekk om dagens leksjon allerede er generert
+  if (state.lessons.some(l => l.day === dayNum)) {
+    const existing = state.lessons.find(l => l.day === dayNum);
+    renderSentences(existing);
+    if (existing.comment) {
+      document.getElementById('commentBody').textContent = existing.comment;
+      document.getElementById('commentBox').style.display = 'block';
+    }
+    setStatus('success', `ℹ️ Leksjon for dag ${dayNum} er allerede generert! Vist ovenfor.`);
+    btn.disabled = false;
+    return;
+  }
+
+  try {
+    // Steg 1: Generer med Claude
+    setStatus('loading', `<span class="spinner"></span><strong>Steg 1/3 — Genererer leksjon...</strong>
+      <ul class="step-list">
+        <li class="active">Lager 3 nye A1–A2 setninger (unngår ${learnedWords.length} kjente ord)</li>
+        <li>Oppdaterer ordbibliotek</li>
+        <li>Lagrer til GitHub Gist</li>
+      </ul>`);
+
+    const lesson = await generateLesson(dayNum, learnedWords, today);
+
+    // Steg 2: Oppdater state
+    setStatus('loading', `<span class="spinner"></span><strong>Steg 2/3 — Oppdaterer ordbibliotek...</strong>
+      <ul class="step-list">
+        <li class="done">Leksjon generert ✓</li>
+        <li class="active">Legger til ${lesson.sentences.length} nye ord</li>
+        <li>Lagrer til GitHub Gist</li>
+      </ul>`);
+
+    const newWords = lesson.sentences.map(s => ({
+      word: s.word, meaning: s.meaning, sentence: s.italian, day: dayNum, date: today
+    }));
+    state.words.push(...newWords);
+    state.lessons.push({ day: dayNum, date: today, sentences: lesson.sentences, comment: lesson.comment || '' });
+
+    // Steg 3: Lagre til Gist
+    setStatus('loading', `<span class="spinner"></span><strong>Steg 3/3 — Lagrer til GitHub Gist...</strong>
+      <ul class="step-list">
+        <li class="done">Leksjon generert ✓</li>
+        <li class="done">Ordbibliotek oppdatert ✓</li>
+        <li class="active">Lagrer JSON til Gist</li>
+      </ul>`);
+
+    const gistResp = await writeGist(state, token, getGistId());
+    const savedId = gistResp.id;
+    showGistLink(savedId);
+    updateCounters();
+    renderSentences(lesson);
+
+    if (lesson.comment && lesson.comment.trim()) {
+      document.getElementById('commentBody').textContent = lesson.comment;
+      document.getElementById('commentBox').style.display = 'block';
+    }
+
+    const newWordNames = lesson.sentences.map(s => s.word).join(', ');
+    setStatus('success', `✅ <strong>Dag ${dayNum} lagret!</strong> Nye ord: <strong>${newWordNames}</strong>. Totalt ${state.words.length} ord i biblioteket.`);
+
+    if (!getGistId()) setStatus('success',
+      `✅ <strong>Dag ${dayNum} lagret! Ny Gist opprettet.</strong><br>
+       🔑 Gist-ID: <strong>${savedId}</strong><br>
+       Kopier denne og lim inn i feltet øverst neste gang du åpner appen!`);
+
+  } catch(e) {
+    setStatus('error', `❌ <strong>${e.message}</strong><br><small>Sjekk at GitHub-tokenet har <em>gist</em>-tillatelse.</small>`);
+    console.error(e);
+    // Rull tilbake state hvis noe gikk galt under skriving
+    state.words = state.words.filter(w => w.day !== dayNum);
+    state.lessons = state.lessons.filter(l => l.day !== dayNum);
+  }
+
+  btn.disabled = false;
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', updateCounters);
+</script>
+</body>
+</html>
